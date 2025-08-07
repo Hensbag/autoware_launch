@@ -1,25 +1,23 @@
 <launch>
-  <arg name="launch_driver" default="true"/>
-  <arg name="camera_type" default="left"/>
-
+  <arg name="launch_driver" default="false"/> <!-- Foxy'den geliyor -->
+  
   <group>
     <push-ros-namespace namespace="camera"/>
     <group>
       <push-ros-namespace namespace="traffic_light"/>
-
-      <!-- (usb_cam_node is assumed to have launched on logging PC) -->
-      <node pkg="topic_tools" exec="relay" name="tl_camera_info_relay" output="log">
-        <param name="input_topic" value="$(var camera_type)/camera_info"/>
-        <param name="output_topic" value="camera_info"/>
-        <param name="type" value="sensor_msgs/msg/CameraInfo"/>
-        <param name="reliability" value="best_effort"/>
+      
+      <!-- Sol Kamera -->
+      <node pkg="topic_tools" exec="relay" name="tl_left_camera_relay">
+        <param name="input_topic" value="/zed2/left/image_rect_color"/>
+        <param name="output_topic" value="left/image_raw"/>
+        <param name="type" value="sensor_msgs/msg/Image"/>
       </node>
-
-      <node pkg="topic_tools" exec="relay" name="tl_compressed_image_relay" output="log">
-        <param name="input_topic" value="$(var camera_type)/image_raw/compressed"/>
-        <param name="output_topic" value="image_raw/compressed"/>
-        <param name="type" value="sensor_msgs/msg/CompressedImage"/>
-        <param name="reliability" value="best_effort"/>
+      
+      <!-- Sağ Kamera -->
+      <node pkg="topic_tools" exec="relay" name="tl_right_camera_relay">
+        <param name="input_topic" value="/zed2/right/image_rect_color"/>
+        <param name="output_topic" value="right/image_raw"/>
+        <param name="type" value="sensor_msgs/msg/Image"/>
       </node>
     </group>
   </group>
