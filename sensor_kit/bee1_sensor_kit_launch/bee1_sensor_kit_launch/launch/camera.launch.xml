@@ -1,23 +1,25 @@
 <launch>
-  <arg name="launch_driver" default="false"/> <!-- Foxy'den geliyor -->
-  
+  <arg name="launch_driver" default="true"/>
+
   <group>
     <push-ros-namespace namespace="camera"/>
     <group>
       <push-ros-namespace namespace="traffic_light"/>
-      
-      <!-- Sol Kamera -->
-      <node pkg="topic_tools" exec="relay" name="tl_left_camera_relay">
-        <param name="input_topic" value="/zed2/left/image_rect_color"/>
-        <param name="output_topic" value="left/image_raw"/>
-        <param name="type" value="sensor_msgs/msg/Image"/>
+
+      <!-- Camera Info Relay -->
+      <node pkg="topic_tools" exec="relay" name="tl_camera_info_relay" output="log">
+        <param name="input_topic" value="/zed/zed_node/left/camera_info"/>
+        <param name="output_topic" value="camera_info"/>
+        <param name="type" value="sensor_msgs/msg/CameraInfo"/>
+        <param name="reliability" value="best_effort"/>
       </node>
-      
-      <!-- Sağ Kamera -->
-      <node pkg="topic_tools" exec="relay" name="tl_right_camera_relay">
-        <param name="input_topic" value="/zed2/right/image_rect_color"/>
-        <param name="output_topic" value="right/image_raw"/>
+
+      <!-- Image Relay -->
+      <node pkg="topic_tools" exec="relay" name="tl_image_relay" output="log">
+        <param name="input_topic" value="/zed/zed_node/left/image_rect_color"/>
+        <param name="output_topic" value="image_raw"/>
         <param name="type" value="sensor_msgs/msg/Image"/>
+        <param name="reliability" value="best_effort"/>
       </node>
     </group>
   </group>
