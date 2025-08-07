@@ -1,0 +1,30 @@
+/**:
+  ros__parameters:
+    simulated_frame_id: "base_link"  # PDF'de sürücü konumu ortada (Page 2)
+    origin_frame_id: "map"
+    vehicle_model_type: "DELAY_STEER_ACC_GEARED"  # Vites desteği için (PDF Page 8)
+    initialize_source: "INITIAL_POSE_TOPIC"
+    timer_sampling_time_ms: 25
+    add_measurement_noise: false  # Gerçek araçta gürültü zaten var
+    
+    # ⚙️ PDF SAYFA 2'DEN FİZİKSEL LİMİTLER (TECHNICAL SPECS)
+    vel_lim: 15.28  # 55 km/h → m/s (55/3.6)
+    vel_rate_lim: 6.5  # Maks. fren ivmesi (Max Yavaşlama İvmesi)
+    steer_lim: 0.567  # 32.5° → radyan (32.5*π/180)
+    steer_rate_lim: 0.87  # Direksiyon hızı ≈50°/s → rad/s
+    
+    # ⏱️ PDF SAYFA 8-9 KONTROL SİSTEMİ TEPKİ SÜRELERİ
+    acc_time_delay: 0.15  # Gaz/fren elektroniği gecikmesi
+    acc_time_constant: 0.2  # Motor dinamikleri
+    steer_time_delay: 0.25  # Direksiyon mekaniği gecikmesi
+    steer_time_constant: 0.3  # Step motor tepkisi
+    
+    # 🎯 PDF SAYFA 2 MEKANİK TOLERANSLAR
+    steer_dead_band: 0.05  # %5 ölü bant (mekanik aşınma)
+    
+    # 📍 PDF SAYFA 10 GPS/IMU HASSASİYET
+    x_stddev: 1.5  # XSens MTI-680 yatay hassasiyet
+    y_stddev: 1.5
+    
+    # ⛰️ PDF SAYFA 2 AĞIRLIK DAĞILIMI (835kg)
+    enable_road_slope_simulation: true  # Eğim simülasyonu aktif

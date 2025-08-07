@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Bee1 gerçek ölçüleri (mm) -->
+  <xacro:property name="bee1_length" value="2740" />
+  <xacro:property name="bee1_width" value="1060" />
+  <xacro:property name="bee1_height" value="1785" />
+  
+  <!-- Lexus orijinal ölçüleri (mm) -->
+  <xacro:property name="lexus_length" value="4770" />
+  <xacro:property name="lexus_width" value="1885" />
+  <xacro:property name="lexus_height" value="1685" />
+  
+  <!-- Scale faktörlerinin hesaplanması -->
+  <xacro:property name="scale_x" value="${bee1_length / lexus_length}" />
+  <xacro:property name="scale_y" value="${bee1_width / lexus_width}" />
+  <xacro:property name="scale_z" value="${bee1_height / lexus_height}" />
+  
+  <!-- Vehicle info yükleme -->
+  <xacro:property name="vehicle_info" value="${xacro.load_yaml('$(find bee1_vehicle_description)/config/vehicle_info.param.yaml')}"/>
+
+  <!-- Araç gövdesi -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="${vehicle_info['/**']['ros__parameters']['wheel_base']/2.0} 0 0" rpy="${pi/2.0} 0 ${pi}"/>
+      <geometry>
+        <!-- Scale faktörleri uygulanıyor -->
+        <mesh filename="package://bee1_vehicle_description/mesh/lexus.dae" 
+              scale="${scale_x} ${scale_y} ${scale_z}"/>
+      </geometry>
+    </visual>
+  </link>
+</robot>

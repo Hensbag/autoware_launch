@@ -1,0 +1,19 @@
+/**:
+  ros__parameters:
+    # ⚙️ LASTİK ÖLÇÜLERİ (PDF Sayfa 2: 155/65 R13)
+    wheel_radius: 0.266  # Hesaplama: (13*0.0254 + 2*(0.65*0.155))/2
+    wheel_width: 0.155   # Lastik genişliği 155mm
+    
+    # 📏 ARAÇ BOYUTLARI (PDF Sayfa 2)
+    wheel_base: 1.86     # Dingil mesafesi 1860mm
+    wheel_tread: 0.850   # Arka iz genişliği 850mm (ana referans)
+    
+    # 🚗 GÖVDE UZANTILARI (Autoware standardına göre)
+    front_overhang: 0.41 # Ön uzantı 410mm
+    rear_overhang: 0.47  # Arka uzantı 470mm
+    left_overhang: 0.105 # (Toplam genişlik 1060mm - wheel_tread 850mm)/2 = 105mm
+    right_overhang: 0.105
+    
+    # 📐 DİĞER KRİTİK ÖLÇÜLER
+    vehicle_height: 1.785 # Yükseklik 1785mm
+    max_steer_angle: 0.567 # 32.5° → radyan (32.5*π/180)
