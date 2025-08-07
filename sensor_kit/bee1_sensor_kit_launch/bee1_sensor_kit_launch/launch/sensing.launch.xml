@@ -1,44 +1,104 @@
 <launch>
-  <!-- Foxy Topic'lerini Autoware Topic'lerine Çevirme -->
+  <!-- Common parameters -->
+  <arg name="launch_driver" default="true"/>
+  <arg name="host_ip" default="192.168.1.10"/>
+  <arg name="vehicle_id" default="$(env VEHICLE_ID default)"/>
+  <arg name="vehicle_mirror_param_file" default="$(find-pkg-share bee1_sensor_kit_description)/config/mirror_params.param.yaml"/>
+  <arg name="pointcloud_container_name" default="pointcloud_container"/>
+
+  <!-- Vehicle Velocity Converter -->
+  <include file="$(find-pkg-share autoware_vehicle_velocity_converter)/launch/vehicle_velocity_converter.launch.xml">
+    <arg name="input_vehicle_velocity_topic" value="/vehicle/status/velocity_status"/>
+    <arg name="output_twist_with_covariance" value="/sensing/vehicle_velocity_converter/twist_with_covariance"/>
+  </include>
+
+  <!-- Lidar Configuration -->
+  <group>
+    <push-ros-namespace namespace="lidar"/>
+    
+    <!-- Velodyne VLP-16 Configuration -->
+    <group>
+      <push-ros-namespace namespace="top"/>
+      <include file="$(find-pkg-share common_sensor_launch)/launch/velodyne_VLP16.launch.xml">
+        <!-- From your PDF: Velodyne IP is 192.168.1.201 -->
+        <arg name="sensor_ip" value="192.168.1.201"/>
+        <arg name="host_ip" value="$(var host_ip)"/>
+        <arg name="data_port" value="2368"/>
+        
+        <!-- Sensor configuration from your PDF -->
+        <arg name="max_range" value="100.0"/> <!-- VLP-16 max range 100m -->
+        <arg name="scan_phase" value="0.0"/>
+        <arg name="sensor_frame" value="velodyne_top"/>
+        <arg name="cloud_min_angle" value="300"/> <!-- Vertical FOV: +15° to -15° -->
+        <arg name="cloud_max_angle" value="60"/> <!-- Converted from -15° to +15° -->
+        
+        <arg name="launch_driver" value="$(var launch_driver)"/>
+        <arg name="vehicle_mirror_param_file" value="$(var vehicle_mirror_param_file)"/>
+        <arg name="container_name" value="$(var pointcloud_container_name)"/>
+      </include>
+    </group>
+
+    <!-- Pointcloud Preprocessing -->
+    <include file="$(find-pkg-share bee1_sensor_kit_launch)/launch/pointcloud_preprocessor.launch.py">
+      <arg name="base_frame" value="base_link"/>
+      <arg name="use_intra_process" value="true"/>
+      <arg name="use_multithread" value="true"/>
+      <arg name="pointcloud_container_name" value="$(var pointcloud_container_name)"/>
+    </include>
+  </group>
+
+  <!-- Sensor Data Relaying (Foxy → Autoware) -->
   <group>
     <!-- Velodyne LIDAR -->
-    <node pkg="topic_tools" exec="relay" name="lidar_relay">
+    <node pkg="topic_tools" exec="relay" name="lidar_relay" output="screen">
       <param name="input_topic" value="/velodyne_points"/>
       <param name="output_topic" value="/sensing/lidar/top/pointcloud_raw"/>
       <param name="type" value="sensor_msgs/msg/PointCloud2"/>
     </node>
 
-    <!-- ZED2 Sol Kamera -->
-    <node pkg="topic_tools" exec="relay" name="camera_left_relay">
+    <!-- ZED2 Left Camera -->
+    <node pkg="topic_tools" exec="relay" name="camera_left_relay" output="screen">
       <param name="input_topic" value="/zed2/left/image_rect_color"/>
       <param name="output_topic" value="/sensing/camera/traffic_light/left/image_raw"/>
       <param name="type" value="sensor_msgs/msg/Image"/>
     </node>
 
-    <!-- ZED2 Sağ Kamera -->
-    <node pkg="topic_tools" exec="relay" name="camera_right_relay">
+    <!-- ZED2 Right Camera -->
+    <node pkg="topic_tools" exec="relay" name="camera_right_relay" output="screen">
       <param name="input_topic" value="/zed2/right/image_rect_color"/>
       <param name="output_topic" value="/sensing/camera/traffic_light/right/image_raw"/>
       <param name="type" value="sensor_msgs/msg/Image"/>
     </node>
 
     <!-- Xsens IMU -->
-    <node pkg="topic_tools" exec="relay" name="imu_relay">
+    <node pkg="topic_tools" exec="relay" name="imu_relay" output="screen">
       <param name="input_topic" value="/imu/data"/>
       <param name="output_topic" value="/sensing/imu/tamagawa/imu_raw"/>
       <param name="type" value="sensor_msgs/msg/Imu"/>
     </node>
 
-  <!-- Autoware Sensör İşleme Pipeline'ı -->
-  <include file="$(find-pkg-share pointcloud_preprocessor)/launch/pointcloud_preprocessor.launch.xml">
-    <arg name="input_topic" value="/sensing/lidar/top/pointcloud_raw"/>
-    <arg name="output_topic" value="/sensing/lidar/top/pointcloud_processed"/>
-  </include>
+    <!-- Xsens GPS -->
+    <node pkg="topic_tools" exec="relay" name="gnss_relay" output="screen">
+      <param name="input_topic" value="/gps/odom"/>
+      <param name="output_topic" value="/sensing/gnss/ublox/fix"/>
+      <param name="type" value="nav_msgs/msg/Odometry"/>
+    </node>
+  </group>
 
-  <!-- IMU Düzeltme -->
-  <include file="$(find-pkg-share imu_corrector)/launch/imu_corrector.launch.xml">
-    <arg name="input_topic" value="/sensing/imu/tamagawa/imu_raw"/>
-    <arg name="output_topic" value="/sensing/imu/tamagawa/imu_corrected"/>
-    <arg name="param_file" value="$(find-pkg-share bee1_sensor_kit_launch)/config/imu_corrector.param.yaml"/>
-  </include>
+  <!-- Vehicle Interface -->
+  <group>
+    <!-- Convert CAN messages to Autoware format -->
+    <node pkg="topic_tools" exec="relay" name="vehicle_status_relay" output="screen">
+      <param name="input_topic" value="/beemobs/FB_VehicleSpeed"/>
+      <param name="output_topic" value="/vehicle/status/velocity_status"/>
+      <param name="type" value="autoware_auto_vehicle_msgs/msg/VelocityReport"/>
+    </node>
+
+    <!-- Relay control commands from Autoware to vehicle CAN bus -->
+    <node pkg="topic_tools" exec="relay" name="control_cmd_relay" output="screen">
+      <param name="input_topic" value="/control/command/control_cmd"/>
+      <param name="output_topic" value="/autoware_control_cmd"/>
+      <param name="type" value="autoware_auto_control_msgs/msg/AckermannControlCommand"/>
+    </node>
+  </group>
 </launch>
