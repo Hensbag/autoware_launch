@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="bee1_sensor_kit_macro" params="parent x y z roll pitch yaw">
+    <!-- SENSOR INCLUDES -->
+    <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
+    <xacro:include filename="$(find camera_description)/urdf/monocular_camera.xacro"/> <!-- MONOCULAR KULLAN -->
+    <xacro:include filename="$(find imu_description)/urdf/imu.xacro"/>
+
+    <xacro:arg name="gpu" default="false"/>
+    <xacro:arg name="config_dir" default="$(find bee1_sensor_kit_description)/config"/>
+
+    <!-- SENSOR KIT BASE LINK -->
+    <xacro:property name="sensor_kit_base_link" value="sensor_kit_base_link"/>
+    <joint name="${sensor_kit_base_link}_joint" type="fixed">
+      <origin rpy="${roll} ${pitch} ${yaw}" xyz="${x} ${y} ${z}"/>
+      <parent link="${parent}"/>
+      <child link="${sensor_kit_base_link}"/>
+    </joint>
+    <link name="${sensor_kit_base_link}"/>
+
+    <!-- KALIBRASYON YÜKLE -->
+    <xacro:property name="calibration" value="${xacro.load_yaml('$(arg config_dir)/sensor_kit_calibration.yaml')}"/>
+
+    <!-- 1. VELODYNE LIDAR (TEK LIDAR) -->
+    <xacro:VLP-16 
+      parent="${sensor_kit_base_link}" 
+      name="velodyne_top" 
+      topic="/points_raw" 
+      gpu="$(arg gpu)">
+      <origin
+        xyz="${calibration['sensor_kit_base_link']['lidar_top']['x']}
+             ${calibration['sensor_kit_base_link']['lidar_top']['y']}
+             ${calibration['sensor_kit_base_link']['lidar_top']['z']}"
+        rpy="${calibration['sensor_kit_base_link']['lidar_top']['roll']}
+             ${calibration['sensor_kit_base_link']['lidar_top']['pitch']}
+             ${calibration['sensor_kit_base_link']['lidar_top']['yaw']}"
+      />
+    </xacro:VLP-16>
+
+    <!-- 2. ZED2 SOL KAMERA (MONOCULAR) -->
+    <xacro:monocular_camera_macro
+      name="traffic_light_left_camera"
+      parent="${sensor_kit_base_link}"
+      namespace=""
+      x="${calibration['sensor_kit_base_link']['traffic_light_left_camera']['x']}"
+      y="${calibration['sensor_kit_base_link']['traffic_light_left_camera']['y']}"
+      z="${calibration['sensor_kit_base_link']['traffic_light_left_camera']['z']}"
+      roll="${calibration['sensor_kit_base_link']['traffic_light_left_camera']['roll']}"
+      pitch="${calibration['sensor_kit_base_link']['traffic_light_left_camera']['pitch']}"
+      yaw="${calibration['sensor_kit_base_link']['traffic_light_left_camera']['yaw']}"
+      fps="30"
+      width="2208"
+      height="1242"
+      fov="1.92" 
+    />
+
+    <!-- 3. ZED2 SAĞ KAMERA (MONOCULAR) -->
+    <xacro:monocular_camera_macro
+      name="traffic_light_right_camera"
+      parent="${sensor_kit_base_link}"
+      namespace=""
+      x="${calibration['sensor_kit_base_link']['traffic_light_right_camera']['x']}"
+      y="${calibration['sensor_kit_base_link']['traffic_light_right_camera']['y']}"
+      z="${calibration['sensor_kit_base_link']['traffic_light_right_camera']['z']}"
+      roll="${calibration['sensor_kit_base_link']['traffic_light_right_camera']['roll']}"
+      pitch="${calibration['sensor_kit_base_link']['traffic_light_right_camera']['pitch']}"
+      yaw="${calibration['sensor_kit_base_link']['traffic_light_right_camera']['yaw']}"
+      fps="30"
+      width="2208"
+      height="1242"
+      fov="1.92" 
+    />
+
+    <!-- 4. ZED2 IMU -->
+    <xacro:imu_macro
+      name="zed_imu"
+      parent="${sensor_kit_base_link}"
+      namespace=""
+      x="${calibration['sensor_kit_base_link']['zed_imu_link']['x']}"
+      y="${calibration['sensor_kit_base_link']['zed_imu_link']['y']}"
+      z="${calibration['sensor_kit_base_link']['zed_imu_link']['z']}"
+      roll="${calibration['sensor_kit_base_link']['zed_imu_link']['roll']}"
+      pitch="${calibration['sensor_kit_base_link']['zed_imu_link']['pitch']}"
+      yaw="${calibration['sensor_kit_base_link']['zed_imu_link']['yaw']}"
+      fps="100"
+    />
+
+    <!-- 5. XSENS GNSS/IMU -->
+    <xacro:imu_macro
+      name="gnss"
+      parent="${sensor_kit_base_link}"
+      namespace=""
+      x="${calibration['sensor_kit_base_link']['gnss_link']['x']}"
+      y="${calibration['sensor_kit_base_link']['gnss_link']['y']}"
+      z="${calibration['sensor_kit_base_link']['gnss_link']['z']}"
+      roll="${calibration['sensor_kit_base_link']['gnss_link']['roll']}"
+      pitch="${calibration['sensor_kit_base_link']['gnss_link']['pitch']}"
+      yaw="${calibration['sensor_kit_base_link']['gnss_link']['yaw']}"
+      fps="100"
+    />
+
+    <!-- 6. XSENS IMU -->
+    <xacro:imu_macro
+      name="tamagawa_imu"
+      parent="${sensor_kit_base_link}"
+      namespace=""
+      x="${calibration['sensor_kit_base_link']['tamagawa_imu_link']['x']}"
+      y="${calibration['sensor_kit_base_link']['tamagawa_imu_link']['y']}"
+      z="${calibration['sensor_kit_base_link']['tamagawa_imu_link']['z']}"
+      roll="${calibration['sensor_kit_base_link']['tamagawa_imu_link']['roll']}"
+      pitch="${calibration['sensor_kit_base_link']['tamagawa_imu_link']['pitch']}"
+      yaw="${calibration['sensor_kit_base_link']['tamagawa_imu_link']['yaw']}"
+      fps="100"
+    />
+  </xacro:macro>
+</robot>

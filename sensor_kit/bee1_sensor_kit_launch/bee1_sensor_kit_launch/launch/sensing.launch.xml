@@ -1,0 +1,38 @@
+<launch>
+  <!-- ... mevcut içerik ... -->
+
+  <!-- Host topic'lerini Autoware formatına çeviren relay node'ları ekle -->
+  <group>
+    <!-- Velodyne -->
+    <node pkg="topic_tools" exec="relay" name="lidar_relay">
+      <param name="input_topic" value="/velodyne_points"/>
+      <param name="output_topic" value="/sensing/lidar/top/pointcloud_raw"/>
+    </node>
+
+    <!-- ZED2 -->
+    <node pkg="topic_tools" exec="relay" name="camera_relay">
+      <param name="input_topic" value="/zed2/left/image_rect_color"/>
+      <param name="output_topic" value="/sensing/camera/traffic_light/left/image_raw"/>
+    </node>
+    
+    <node pkg="topic_tools" exec="relay" name="camera_relay">
+      <param name="input_topic" value="/zed2/right/image_rect_color"/>
+      <param name="output_topic" value="/sensing/camera/traffic_light/right/image_raw"/>
+    </node>
+
+    <!-- Xsens IMU -->
+    <node pkg="topic_tools" exec="relay" name="imu_relay">
+      <param name="input_topic" value="/imu/data"/>
+      <param name="output_topic" value="/sensing/imu/imu_data"/>
+    </node>
+
+    <!-- Xsens GPS -->
+    <node pkg="topic_tools" exec="relay" name="gnss_relay">
+      <param name="input_topic" value="/fix"/> <!-- Xsens default GPS topic -->
+      <param name="output_topic" value="/sensing/gnss/ublox/fix"/>
+    </node>
+  </group>
+
+  <!-- Orijinal sensör include'ları kaldırılmalı -->
+  <!-- <include file="$(find-pkg-share bee1_sensor_kit_launch)/launch/lidar.launch.xml"> ... -->
+</launch>

@@ -1,0 +1,54 @@
+sensor_kit_base_link:
+  # Velodyne LIDAR (Ön tampon arkası, merkezde)
+  lidar_top:
+    x: 0.177   # Ön aks merkezinden 177mm geri (X yönü tersi)
+    y: 0.0
+    z: 0.620    # Yerden 620mm yükseklik
+    roll: 0.0
+    pitch: 0.0
+    yaw: 0.0    # Öne bakacak şekilde
+
+  # ZED2 Stereo Kamera - SOL (Ön cam arkası)
+  traffic_light_left_camera:
+    x: 0.205   # Ön aks merkezinden 205mm geri
+    y: 0.060    # Merkezden 60mm sol (Y yönü tersi)
+    z: 0.685    # Yerden 685mm yükseklik
+    roll: 0.0
+    pitch: 0.0
+    yaw: 0.0    # Öne bakıyor
+
+  # ZED2 Stereo Kamera - SAĞ (Ön cam arkası)
+  traffic_light_right_camera:
+    x: 0.205   # Ön aks merkezinden 205mm geri
+    y: -0.060   # Merkezden 60mm sağ (Y yönü tersi)
+    z: 0.685    # Yerden 685mm yükseklik
+    roll: 0.0
+    pitch: 0.0
+    yaw: 0.0    # Öne bakıyor
+
+  # ZED2 IMU (Kamera ile aynı pozisyonda)
+  zed_imu_link:
+    x: 0.205   # Kameralarla aynı X
+    y: 0.0      # Merkezde
+    z: 0.685    # Kameralarla aynı Z
+    roll: 0.0  # 180° (IMU yön düzeltmesi)
+    pitch: 0.0
+    yaw: 0.0
+
+  # XSens GNSS/IMU (Sürücü kafası üstü)
+  gnss_link:
+    x: -1.440    # Ön aks merkezinden 1440mm ileri (X yönü tersi)
+    y: 0.0
+    z: 1.390    # Yerden 1390mm yükseklik
+    roll: 0.0
+    pitch: 0.0
+    yaw: 0.0
+
+  # XSens IMU (GNSS ile aynı)
+  tamagawa/imu_link:
+    x: -1.440    # GNSS ile aynı X
+    y: 0.0
+    z: 1.390    # GNSS ile aynı Z
+    roll: 0.0  # 180° (IMU yön düzeltmesi)
+    pitch: 0.0
+    yaw: 0.0   # 180° (IMU yön düzeltmesi)
