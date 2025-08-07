@@ -1,38 +1,44 @@
 <launch>
-  <!-- ... mevcut içerik ... -->
-
-  <!-- Host topic'lerini Autoware formatına çeviren relay node'ları ekle -->
+  <!-- Foxy Topic'lerini Autoware Topic'lerine Çevirme -->
   <group>
-    <!-- Velodyne -->
+    <!-- Velodyne LIDAR -->
     <node pkg="topic_tools" exec="relay" name="lidar_relay">
       <param name="input_topic" value="/velodyne_points"/>
       <param name="output_topic" value="/sensing/lidar/top/pointcloud_raw"/>
+      <param name="type" value="sensor_msgs/msg/PointCloud2"/>
     </node>
 
-    <!-- ZED2 -->
-    <node pkg="topic_tools" exec="relay" name="camera_relay">
+    <!-- ZED2 Sol Kamera -->
+    <node pkg="topic_tools" exec="relay" name="camera_left_relay">
       <param name="input_topic" value="/zed2/left/image_rect_color"/>
       <param name="output_topic" value="/sensing/camera/traffic_light/left/image_raw"/>
+      <param name="type" value="sensor_msgs/msg/Image"/>
     </node>
-    
-    <node pkg="topic_tools" exec="relay" name="camera_relay">
+
+    <!-- ZED2 Sağ Kamera -->
+    <node pkg="topic_tools" exec="relay" name="camera_right_relay">
       <param name="input_topic" value="/zed2/right/image_rect_color"/>
       <param name="output_topic" value="/sensing/camera/traffic_light/right/image_raw"/>
+      <param name="type" value="sensor_msgs/msg/Image"/>
     </node>
 
     <!-- Xsens IMU -->
     <node pkg="topic_tools" exec="relay" name="imu_relay">
       <param name="input_topic" value="/imu/data"/>
-      <param name="output_topic" value="/sensing/imu/imu_data"/>
+      <param name="output_topic" value="/sensing/imu/tamagawa/imu_raw"/>
+      <param name="type" value="sensor_msgs/msg/Imu"/>
     </node>
 
-    <!-- Xsens GPS -->
-    <node pkg="topic_tools" exec="relay" name="gnss_relay">
-      <param name="input_topic" value="/fix"/> <!-- Xsens default GPS topic -->
-      <param name="output_topic" value="/sensing/gnss/ublox/fix"/>
-    </node>
-  </group>
+  <!-- Autoware Sensör İşleme Pipeline'ı -->
+  <include file="$(find-pkg-share pointcloud_preprocessor)/launch/pointcloud_preprocessor.launch.xml">
+    <arg name="input_topic" value="/sensing/lidar/top/pointcloud_raw"/>
+    <arg name="output_topic" value="/sensing/lidar/top/pointcloud_processed"/>
+  </include>
 
-  <!-- Orijinal sensör include'ları kaldırılmalı -->
-  <!-- <include file="$(find-pkg-share bee1_sensor_kit_launch)/launch/lidar.launch.xml"> ... -->
+  <!-- IMU Düzeltme -->
+  <include file="$(find-pkg-share imu_corrector)/launch/imu_corrector.launch.xml">
+    <arg name="input_topic" value="/sensing/imu/tamagawa/imu_raw"/>
+    <arg name="output_topic" value="/sensing/imu/tamagawa/imu_corrected"/>
+    <arg name="param_file" value="$(find-pkg-share bee1_sensor_kit_launch)/config/imu_corrector.param.yaml"/>
+  </include>
 </launch>
